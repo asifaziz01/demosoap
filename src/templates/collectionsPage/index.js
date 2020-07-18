@@ -61,6 +61,9 @@ const CollectionsPage = ({ data }) => {
     categoryBg = giftBg;
     bgColor = "#f1f1ef";
   }
+  const compared = (price) => {
+    if (price) {return('CA'+price)}
+  }
   
   const getPrice = (price) =>
     Intl.NumberFormat(undefined, {
@@ -306,7 +309,7 @@ const CollectionsPage = ({ data }) => {
                       >
                         <div className={displayClass + " trending-products"}>
                           <div className={imgClass + " productImage"}>
-                            <Link to={`/product/${handle}/`} className="">
+                            <Link to={`/products/${handle}/`} className="">
                               <div className="tp-image">
                                 {images.length &&
                                   images[0].localFile.childImageSharp.original
@@ -360,12 +363,14 @@ const CollectionsPage = ({ data }) => {
                                   }
                                   style={{ fontSize: "1.2rem", color: "#4e4e4e" }}
                                 >
-                                  {getPrice(variants[0].price)}
+                                  
+                                <span className="clickclack style-1 collectionPrice"> <del>{compared(variants[0].compareAtPrice)}</del> </span>
+                                 {getPrice(variants[0].price)}
                                 </span>
                               </div>
 
                               <Link
-                                to={`/product/${handle}/`}
+                                to={`/products/${handle}/`}
                                 className="clickclack d-block product-name"
                                 style={{ textDecoration: "none" }}
                               >
@@ -390,7 +395,7 @@ const CollectionsPage = ({ data }) => {
                                     {description.substring(0, MAX_LENGTH)}...
                                   </p>
                                   <Link
-                                    to={`/product/${handle}/`}
+                                    to={`/products/${handle}/`}
                                     className="more josefin-sans-sb text-decoration-none position-relative"
                                     style={{
                                       fontSize: "1.3rem",
@@ -405,7 +410,7 @@ const CollectionsPage = ({ data }) => {
                                   style={{ minWidth: "150px" }}
                                 >
                                   <Link
-                                    to={`/product/${handle}/`}
+                                    to={`/products/${handle}/`}
                                     className="text-decoration-none px-3 py-3 d-block josefin-sans-b cart-btn border border-dark btns position-relative"
                                     style={{ fontSize: "0.8rem" }}
                                   >
@@ -452,6 +457,7 @@ export const query = graphql`
         }
         variants {
           price
+          compareAtPrice
         }
         priceRange {
           maxVariantPrice {

@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import StoreContext from "~/context/store";
+import VariantSelectors from "~/components/variantSelectors"
 
 const ProductForm = ({ product }) => {
   const {
@@ -10,6 +11,7 @@ const ProductForm = ({ product }) => {
   const MAX_LENGTH = 200;
   const variant = { ...initialVariant };
   const [quantity, setQuantity] = useState(1);
+  const [variantP, setVariant] = useState(product.variants[0]);
   const {
     addVariantToCart,
     addVariantToCartAndBuyNow,
@@ -24,6 +26,14 @@ const ProductForm = ({ product }) => {
     minimumFractionDigits: 2,
     style: "currency",
   }).format(variant.price);
+
+  const compareAtPrice = () => {
+    if (variant.compareAtPrice) {
+      return('CA'+variant.compareAtPrice)
+    };
+  }
+  
+
   //checkout.currencyCode = productVariant.presentmentPrices.edges[1].node.price.currencyCode;
   const checkAvailability = useCallback(
     (productId) => {
@@ -43,6 +53,24 @@ const ProductForm = ({ product }) => {
   useEffect(() => {
     checkAvailability(product.shopifyId);
   }, [productVariant, checkAvailability, product.shopifyId]);
+
+
+  useEffect(() => {
+    let defaultOptionValues = {}
+    product.options.forEach(selector => {
+        defaultOptionValues[selector.name] = selector.values[0]
+    })
+    setVariant(defaultOptionValues)
+  }, [])
+
+  const handleOptionChange = event => {
+    const { target } = event
+    setVariant(prevState => ({
+        ...prevState,
+        [target.name]: target.value,
+        ...console.log(variantP)
+    }))
+  }
 
   const decreaseQuantity = (event) => {
     event.preventDefault();
@@ -65,10 +93,28 @@ const ProductForm = ({ product }) => {
   };
   return (
     <>
-      <h3 className="clickclack product-price">{price}</h3>
+
+    <div className="style-1">
+      <del>
+        <span className="clickclack amount">{compareAtPrice()}</span>
+      </del>
+      <ins>
+      <h3 className="clickclack amount product-price">{price}</h3>
+      </ins>
+    </div>
+  <span className="weight">Weight: {productVariant.weight} <span style={{ textTransform : 'lowercase'}}>{productVariant.weightUnit}</span></span>
       <p className="josefin-sans mt-3 mb-5">
         {product.description.substring(0, MAX_LENGTH)}&hellip;
       </p>
+      {
+          product.options.map(options => (
+              <VariantSelectors
+                  onChange={handleOptionChange}
+                  key={options.id.toString()}
+                  options={options}
+              />
+          ))
+      }
       <div className="row align-items-center">
         <div className="col-auto select-qnty">
           <button
