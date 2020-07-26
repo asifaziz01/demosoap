@@ -6,8 +6,8 @@ require("dotenv").config({
 module.exports = {
   siteMetadata: {
     author: `Inovexia`,
-    title: `Demosoap | Natural Handmade soaps made in our Toronto workshop Est. 2004`,
-    description: `Made in Toronto with several years of experience Demosoap has the secret to formulating the perfect soap that cleanses without overly drying and has just the right amount of skin-nourishing natural oils, fragrance and additives. All Demosoaps are certified vegan gluten free kosher hypoallergenic and biodegaradable`,
+    title: `Demosoap | Natural Handmade soaps made in Toronto Est.04`,
+    description: `Handmade soaps with natural organic and ethical ingredients made in our Toronto workshop.`,
     short_title: `DEMOSOAP`,
     siteUrl: `https://demosoap.com`,
   },
@@ -16,6 +16,8 @@ module.exports = {
     `gatsby-plugin-sass`,
     `gatsby-plugin-sitemap`,
     `gatsby-plugin-layout`, 
+    `gatsby-plugin-remove-serviceworker`,
+    `gatsby-plugin-netlify-cache`, 
     {
       resolve: "gatsby-plugin-mailchimp",
       options: {
@@ -28,8 +30,6 @@ module.exports = {
         firstPaint: false,
         firstContentfulPaint: true,
         firstInputDelay: true,
-        //useLogging: true,
-        //useGoogleAnalytics: false
       }
     },
     {
@@ -67,36 +67,16 @@ module.exports = {
       options: {
         shopName: process.env.SHOP_NAME,
         accessToken: process.env.SHOPIFY_ACCESS_TOKEN,
-        verbose: false,
-        // paginationSize: 250,
-        // includeCollections: ["shop", "content"],
+        verbose: false
       },
+    },{
+      resolve: 'gatsby-plugin-robots-txt',
+      options: {
+        host: 'https://demosoap.com',
+        sitemap: 'https://demosoap.com/sitemap.xml',
+        policy: [{ userAgent: '*', allow: '/' }]
+      }
     },
-    // {
-    //   resolve: "gatsby-source-graphql",
-    //   options: {
-    //     typeName: "Shopify",
-    //     fieldName: "shopify",
-    //     url: `https://${process.env.SHOP_NAME}.myshopify.com/api/graphql`,
-    //     headers: {
-    //       "X-Shopify-Storefront-Access-Token": process.env.SHOPIFY_ACCESS_TOKEN
-    //     }
-    //     //refetchInterval: 60
-    //   }
-    // },
-    // {
-    //   resolve: `gatsby-source-graphql`,
-    //   options: {
-    //     typeName: `WPGraphQL`,
-    //     fieldName: `wpgraphql`,
-    //     url: `${process.env.WORDPRESS_URL}/graphql`,
-    //     searchAndReplaceContentUrls: {
-    //       sourceUrl: `${process.env.WORDPRESS_URL}`,
-    //       replacementUrl: ``
-    //     }
-    //     // refetchInterval: 60,
-    //   }
-    // },
     `gatsby-transformer-sharp`,
     `gatsby-plugin-sharp`,
     {
@@ -110,11 +90,21 @@ module.exports = {
         display: `minimal-ui`,
         icon: `src/assets/img/favicon.png`,
       },
-    },
+    }, 
     {
       resolve: `gatsby-plugin-netlify`,
       options: {
-        headers: {}, // option to add more headers. `Link` headers are transformed by the below criteria
+        headers: {
+          "/*.js": [
+            "cache-control: public, max-age=31536000, immutable",
+          ],
+          "/*.css": [
+            "cache-control: public, max-age=31536000, immutable",
+          ],
+          "/sw.js": [
+            "cache-control: public, max-age=0, must-revalidate",
+          ],
+        },
         allPageHeaders: [], // option to add headers for all pages. `Link` headers are transformed by the below criteria
         mergeSecurityHeaders: true, // boolean to turn off the default security headers
         mergeLinkHeaders: true, // boolean to turn off the default gatsby js headers
@@ -122,6 +112,26 @@ module.exports = {
         transformHeaders: (headers, path) => headers, // optional transform for manipulating headers under each path (e.g.sorting), etc.
         generateMatchPathRewrites: true, // boolean to turn off automatic creation of redirect rules for client only paths
       },
-    }
+    },
+    {
+      resolve: `gatsby-plugin-google-analytics`,
+      options: {
+        // The property ID; the tracking code won't be generated without it
+        trackingId: "UA-1202733-9",
+        // Defines where to place the tracking script - `true` in the head and `false` in the body
+        head: false,
+        // Setting this parameter is optional
+        anonymize: true,
+        // Setting this parameter is also optional
+        respectDNT: true,
+        // Delays sending pageview hits on route update (in milliseconds)
+        pageTransitionDelay: 0,
+        defer: false,
+        // Any additional optional fields
+        sampleRate: 5,
+        siteSpeedSampleRate: 10,
+        cookieDomain: "demosoap.com",
+      },
+    },
   ],
 };
